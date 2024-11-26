@@ -12,14 +12,33 @@ $woocommerce = new Client(
     'cs_3d0d0dede462ab5b35d248b4205ec50f945566d7', // Tu Consumer Secret
     [
         'wp_api' => true,
-        'version' => 'wc/v3', 
+        'version' => 'wc/v3',
     ]
 );
 
 try {
     // Obtener productos
     $products = $woocommerce->get('products');
-    print_r($products);
+
+    // Procesar y mostrar solo los datos deseados
+    foreach ($products as $product) {
+        $sku = $product->sku;
+        $name = $product->name;
+        $price = $product->regular_price;
+        $sale_price = $product->sale_price;
+        $discount_percentage = $sale_price && $price ? round((($price - $sale_price) / $price) * 100, 2) . '%' : 'No aplica';
+        $categories = array_map(function ($category) {
+            return $category->name;
+        }, $product->categories);
+
+        echo "SKU: $sku\n";
+        echo "Nombre: $name\n";
+        echo "Precio: $price\n";
+        echo "Precio rebajado: $sale_price\n";
+        echo "Porcentaje de descuento: $discount_percentage\n";
+        echo "Categorías: " . implode(', ', $categories) . "\n";
+        echo "----------------------\n";
+    }
 } catch (HttpClientException $e) {
     // Manejo de errores
     echo 'Error: ' . $e->getMessage();
